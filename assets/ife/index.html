@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Node.js练习</title>
+	<style type="text/css">
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		#container{
+			width: 300px;
+			height: 200px;
+			background-color: cornflowerblue;
+			position: fixed;
+			top:0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			margin: auto;
+		}
+
+		#btn{
+			position: relative;
+			top: 40px;
+			text-align: center;
+		}
+		#login{
+			padding-top: 5px;
+			padding-bottom: 5px;
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+		label,.text{
+			position: relative;
+		}
+		.input{
+			position: relative;
+			top:20px;
+			padding-top: 10px;
+			text-align: center;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="container">
+		<form action="http://192.168.1.104:8080/index.html" method="POST">
+			<div class="input"><label id="id">用户名</label><input class="text" type="text" name="id"/></div>
+			<div class="input"><label id="pw">密&nbsp;&nbsp;&nbsp;码</label><input class="text" type="text" name="password"></div>
+			<div id="btn"><input id="login" type="submit" value="登陆"></div>
+		</form>
+	</div>
+</body>
+</html>

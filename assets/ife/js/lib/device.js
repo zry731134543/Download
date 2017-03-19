@@ -1,20 +1,12 @@
-
 /**
- *
- * @type {{deviceType: (deviceType|*),
- * 设备类型
- * screenWidth: window.screen.width,
- * 设备屏幕宽度
- * screenHeight:window.screen.height,
- * 设备屏幕高度
- * methods: {1: {callMethod: callMethod, setScreenOrientation: setScreenOrientation, getDeviceInfo: getDeviceInfo, setDeviceStatus:setDeviceStatus},
- * 2: {callMethod: callMethod, setScreenOrientation: setScreenOrientation, getDeviceInfo: getDeviceInfo, setDeviceStatus:setDeviceStatus}},
- * 方法集合:1 设备状态为手机,2 设备状态为pc
+ * 设备类型: deviceType
+ * 设备屏幕宽度: screenWidth: window.screen.width,
+ * 设备屏幕高度: screenHeight:window.screen.height,
+ * 方法集合:1 设备状态为android手机
+ * methods: {1: {callMethod: callMethod, setScreenOrientation: setScreenOrientation,getDeviceInfo: getDeviceInfo, setDeviceStatus:setDeviceStatus}
  * callMethod 调用壳的方法,setScreenOrientation 设置屏幕显示方向,getDeviceInfo 获取设备信息,setDeviceStatus 设置当前屏幕的显示状态
- * initDevice: initDevice,
- * 初始化device方法
- * getDevice: getDevice
- * 获取设备信息
+ * 初始化device方法:initDevice,
+ * 获取设备信息 : getDevice
  * }}
  */
 var doOk;//记录成功回调方法
@@ -28,22 +20,25 @@ var device = {
     screenOrientation: false,//屏幕显示方式,true竖屏,false横屏
     browserVersion: null,//浏览器版本号
     initDevice: function () {
-    this.callMethod = this.methods[this.deviceType]['callMethod'];
-    this.setScreenOrientation = this.methods[this.deviceType]['setScreenOrientation'];
-    this.setDeviceStatus = this.methods[this.deviceType]['setDeviceStatus'];
-    this.getDeviceData = this.methods[this.deviceType]['getDeviceData'];
-    return this;
+        this.callMethod = this.methods[this.deviceType]['callMethod'];
+        this.setScreenOrientation = this.methods[this.deviceType]['setScreenOrientation'];
+        this.setDeviceStatus = this.methods[this.deviceType]['setDeviceStatus'];
+        this.getDeviceData = this.methods[this.deviceType]['getDeviceData'];
+        return this;
     },
     getDevice: function () {
         var deviceInfo = this.methods[this.deviceType]['getDeviceInfo']();
         return deviceInfo || null;
-    } ,
+    },
     methods: {
         '1': {
-            //与壳进行交互
+            /**
+             * 调用壳里面，InterfaceHelp中的methodName方法
+             * InterfaceHelp为webView传来的对象名
+             * args 所调用的参数方法集合
+             */
             callMethod: function (methodName, args) {
-                //调用壳里面，JSInterfaceHelper中的methodName方法
-                JSInterface[methodName].apply(JSInterface, args);
+                InterfaceHelp[methodName].apply(InterfaceHelp, args);
             },
             //设置屏幕方向
             setScreenOrientation: function (orientation, okCallback, failCallback) {
@@ -61,71 +56,10 @@ var device = {
                 this.screenHeight = document.body.clientHeight;
                 //2.屏幕显示方式,true竖屏,false横屏
                 this.screenOrientation = (this.screenHeight > this.screenWidth) ? true : false;
-                //3.设置大小屏：true大屏；false小屏
-                if (this.screenOrientation) {
-                    this.screenStatus = (this.screenWidth >= 600);
-                } else {
-                    this.screenStatus = (this.screenWidth >= 600);
-                }
+                //3.设置大小屏：true大屏；false小屏，可以细分
+                this.screenStatus = (this.screenWidth >= 600);
             },
             //获取设备数据
-            getDeviceData: function (okCallback, failCallback) {
-                callDeviceMethod('GetDeviceInfo', okCallback, failCallback);
-            }
-        },
-        '2': {
-            callMethod: function (methodName, args, argsStr) {
-                callDeviceIOS(methodName, args);
-            },
-            setScreenOrientation: function (orientation, okCallback, failCallback) {
-                callDeviceMethod('setScreenOrientation', orientation, okCallback, failCallback);
-            },
-            setDeviceStatus: function () {
-                this.screenWidth = document.body.clientWidth;
-                this.screenHeight = document.body.clientHeight;
-
-                this.screenOrientation = (this.screenHeight > this.screenWidth) ? true : false;
-                if (this.screenOrientation) {
-                    this.screenStatus = (this.screenWidth >= 600);
-                }
-                else {
-                    this.screenStatus = (this.screenWidth >= 600);
-                }
-            },
-            getDeviceInfo: function () {
-                return null;
-            }
-        },
-        '3': {
-            callMethod: function (methodName, args, argsStr) {
-                return eval('window.external.' + methodName + '(' + argsStr + ')');
-            },
-            setScreenOrientation: function () {
-                return null;
-            },
-            getDeviceInfo: function () {
-                return null;
-            },
-            setDeviceStatus: function () {
-                this.screenWidth = document.body.clientWidth;
-                this.screenHeight = document.body.clientHeight;
-                //获取浏览器版本
-                this.browser = getBrowserInfo();
-
-                this.browserVersion = (this.browser + "").replace(/[^0-9.]/ig, "");
-                if (this.browserVersion == "7.0") {
-                    if (window.addEventListener) {
-                        this.browserVersion = "8.0";
-                    }
-                }
-                this.screenOrientation = false;
-                if (this.screenOrientation) {
-                    this.screenStatus = (this.screenWidth >= 600);
-                }
-                else {
-                    this.screenStatus = (this.screenWidth >= 600);
-                }
-            },
             getDeviceData: function (okCallback, failCallback) {
                 callDeviceMethod('GetDeviceInfo', okCallback, failCallback);
             }
@@ -162,9 +96,9 @@ function callDeviceMethod() {
     if (argsStr.length > 0)
         argsStr = argsStr.substring(0, argsStr.length - 1);
     try {
-        device.callMethod(methodName, args, argsStr);
+        device.callMethod(methodName, args);
     } catch (ex) {
-        createModal(document.getElementById('body'), ex.message);
+        console.log("调用手机方法失败");
     }
 }
 
@@ -174,14 +108,14 @@ function callDeviceMethod() {
  * @param webJson 服务器返回回来的数据
  */
 function successCallBackForApp(localJson, webJson) {
-    if((typeof childIframe != "undefined") && childIframe != null && typeof (doOk) === "undefined"){
+    if ((typeof childIframe != "undefined") && childIframe != null && typeof (doOk) === "undefined") {
         childIframe.contentWindow.successCallBackForApp(localJson, webJson);
         return;
     }
     if (deviceType != 3) {
         if (!localJson) {
             localJson = '';
-        } else if (isString(localJson) && (localJson.indexOf("{")>=0 || localJson.indexOf("[")>=0)) {
+        } else if (isString(localJson) && (localJson.indexOf("{") >= 0 || localJson.indexOf("[") >= 0)) {
             //解决非json格式的字符串被解析
             localJson = JSON.parse(localJson);
         }
@@ -191,7 +125,7 @@ function successCallBackForApp(localJson, webJson) {
             && webJson != "[]"
             && (webJson.indexOf('Online OFF') < 0)
             && (webJson.indexOf('Connection fail') < 0)
-            && (localJson.indexOf("{")>=0 || localJson.indexOf("[")>=0)) {
+            && (localJson.indexOf("{") >= 0 || localJson.indexOf("[") >= 0)) {
             webJson = JSON.parse(webJson);
         }
     }
@@ -203,93 +137,9 @@ function successCallBackForApp(localJson, webJson) {
  * @param jsonParameters 反馈数据
  */
 function failCallBackForApp(jsonParameters) {
-    if((typeof childIframe != "undefined") && childIframe != null && typeof (doOk) === "undefined")
-    {
+    if ((typeof childIframe != "undefined") && childIframe != null && typeof (doOk) === "undefined") {
         childIframe.contentWindow.failCallBackForApp(jsonParameters);
         return;
     }
     doError(jsonParameters);
-}
-
-/**
- * 没有使用页面的逻辑，直接从壳中调用页面的JS方法
- * @param funName 全局的JS方法名称
- * @param objParam 对象的方式传递
- */
-function methodFromShellDirect(funName, objArg){
-    if((typeof childIframe != "undefined")
-        && childIframe != null
-        && typeof childIframe.contentWindow[funName] == 'function'){
-        childIframe.contentWindow[funName](objArg);
-        return;
-    }
-    window[funName](objArg);
-}
-
-
-
-
-/**
- * JS与IOS的壳中进行交互
- * @param functionName 壳中的函数名
- * @param parameter 传递到壳中的参数
- */
-function callDeviceIOS(functionName, parameter) {
-    connectWebViewJavascriptBridge(function (bridge) {
-        bridge.init(function (message, responseCallback) {
-            var data = { 'Javascript Responds': 'Wee!' };
-            responseCallback(data);
-        });
-        bridge.registerHandler('javascriptHandler', function (data, responseCallback) {
-            if (functionName == 'UpdateCourse') {
-                successCallBackForApp(data);
-            }
-            if (functionName == 'DownloadCourse') {
-                successCallBackForApp(data);
-                responseCallback(1);
-            }
-            else {
-                if (data.local != "") {
-                    data.local = JSON.parse(data.local);
-                }
-
-                if (data.web != "" && data.web !== "Online OFF" && "Connection fail") {
-                    data.web = JSON.parse(data.web);
-                }
-                successCallBackForApp(data.local, data.web);
-            }
-        })
-
-        bridge.registerHandler('localJavascriptHandler', function (data, responseCallback) {
-            objLocal = data;
-            responseCallback(1);
-        })
-
-        bridge.registerHandler('webJavascriptHandler', function (data, responseCallback) {
-            objWeb = data;
-            successCallBackForApp(objLocal, objWeb);
-        })
-
-        bridge.registerHandler('errorJavascriptHandler', function (data, responseCallback) {
-            failCallBackForApp(data);
-        })
-
-        bridge.callHandler(functionName, parameter, function (response) {
-            createModal(document.getElementById('body'), response, 2);
-        });
-    })
-}
-
-/**
- * IOS的Bridge
- * @param callback
- */
-function connectWebViewJavascriptBridge(callback) {
-    if (window.WebViewJavascriptBridge) {
-        callback(WebViewJavascriptBridge);
-    } else {
-        document.addEventListener('WebViewJavascriptBridgeReady', function () {
-            callback(WebViewJavascriptBridge);
-        }, false);
-    }
 }

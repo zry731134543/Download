@@ -6,12 +6,13 @@ require.config({
     //    baseUrl: "js/lib",
 
     //指定各个模块的加载路径。
-    paths:{
-        "device":"lib/device",
+    paths: {
+        "config":"lib/config",
+        "device": "lib/device",
         //"jquery": "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min"可使用网络链接文件
-        "jquery":"lib/jquery-1.9.1.min",
-        "myLib":"app/myLib",
-        "math":"app/math"
+        "jquery": "lib/jquery-1.10.2.min",
+        "myLib": "app/myLib",
+        "math": "app/math"
     }//,
     //配置不兼容的模块
     //每个模块要定义:
@@ -24,9 +25,11 @@ require.config({
 //require()函数接受两个参数
 // 第一个参数是一个数组，表示主模块所依赖的模块
 // 第二个参数是一个回调函数，当前面指定的模块都加载成功后，它将被调用。加载的模块会以参数形式传入该函数，从而在回调函数内部就可以使用这些模块。
-require(['jquery','math','myLib','device'],function($,math,myLib){//,'myLib'
-//    maths();
-//    console.log(device.getDevice());
-//    math.lib();
+require(['config', 'device','jquery', 'math', 'myLib'], function ($, math, myLib) {//,'myLib'
+    //获取设备信息
+    // device.initDevice();
+    // callDeviceMethod("log","main.js",function () {
+    //     console.log("log调用成功");
+    // });
 
 });
